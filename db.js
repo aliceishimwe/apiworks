@@ -1,45 +1,41 @@
-const mysql = require('mysql2');
+const sqlite3 = require('sqlite3').verbose();
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root', 
-  password: '', 
-  database: 'firstapi'
-});
-
-connection.connect((err) => {
-  if (err) throw err;
-  console.log('Connected to MySQL database');
+// Create or connect to the SQLite database file
+const db = new sqlite3.Database('./firstapi.db', (err) => {
+  if (err) {
+    return console.error('Error opening database:', err.message);
+  }
+  console.log('Connected to SQLite database');
 
   // Create products table if not exists
   const createProductsTable = `
     CREATE TABLE IF NOT EXISTS products (
-      pid INT AUTO_INCREMENT PRIMARY KEY,
-      pname VARCHAR(255) NOT NULL,
+      pid INTEGER PRIMARY KEY AUTOINCREMENT,
+      pname TEXT NOT NULL,
       description TEXT,
-      quantity INT,
-      price DECIMAL(10, 2)
+      quantity INTEGER,
+      price REAL
     )
   `;
 
   // Create users table if not exists
   const createUsersTable = `
     CREATE TABLE IF NOT EXISTS users (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      email VARCHAR(255) NOT NULL UNIQUE,
-      password VARCHAR(255) NOT NULL
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      password TEXT NOT NULL
     )
   `;
 
-  connection.query(createProductsTable, (err, result) => {
-    if (err) throw err;
+  db.run(createProductsTable, (err) => {
+    if (err) return console.error('Error creating products table:', err.message);
     console.log('Products table ready');
   });
 
-  connection.query(createUsersTable, (err, result) => {
-    if (err) throw err;
+  db.run(createUsersTable, (err) => {
+    if (err) return console.error('Error creating users table:', err.message);
     console.log('Users table ready');
   });
 });
 
-module.exports = connection;
+module.exports = db;

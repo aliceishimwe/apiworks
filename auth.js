@@ -1,11 +1,9 @@
-// auth.js
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-// JWT secret
 const SECRET_KEY = 'abefghijklmnopqrstuvwxyz1_234567890jdfyhgtuasjgfdsbfeadbmfjdfbvchjdbv_edhs';
 
 // Register user
@@ -15,13 +13,15 @@ router.post('/register', async (req, res) => {
   // Hash password
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Save user
-  db.query('INSERT INTO users (email, password) VALUES (?, ?)', [email, hashedPassword], (err, result) => {
+  // Insert user
+  const query = `INSERT INTO users (email, password) VALUES (?, ?)`;
+
+  db.run(query, [email, hashedPassword], function (err) {
     if (err) {
-      console.error(err);
+      console.error(err.message);
       return res.status(400).json({ message: 'User already exists or error occurred' });
     }
-    res.json({ message: 'User registered successfully' });
+    res.json({ message: 'User registered successfully', userId: this.lastID });
   });
 });
 
@@ -29,16 +29,19 @@ router.post('/register', async (req, res) => {
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
-    if (err) throw err;
+  const query = `SELECT * FROM users WHERE email = ?`;
 
-    if (results.length === 0) {
+  db.get(query, [email], async (err, user) => {
+    if (err) {
+      console.error(err.message);
+      return res.status(500).json({ message: 'Database error' });
+    }
+
+    if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const user = results[0];
-
-    // Check password
+    // Compare passwords
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({ message: 'Invalid credentials' });
