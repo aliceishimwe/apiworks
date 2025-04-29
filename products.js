@@ -13,6 +13,7 @@ router.get('/', (req, res) => {
 // Add new product
 router.post('/', (req, res) => {
   const { pname, description, quantity, price } = req.body;
+  console.log(req.body);
   const query = 'INSERT INTO products (pname, description, quantity, price) VALUES (?, ?, ?, ?)';
   db.query(query, [pname, description, quantity, price], (err, result) => {
     if (err) throw err;
