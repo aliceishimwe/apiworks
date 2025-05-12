@@ -5,6 +5,7 @@ const authRoutes = require('./auth');
 const jwt = require('jsonwebtoken');
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 
 const SECRET_KEY = 'abefghijklmnopqrstuvwxyz1_234567890jdfyhgtuasjgfdsbfeadbmfjdfbvchjdbv_edhs';
