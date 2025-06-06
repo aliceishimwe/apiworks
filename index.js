@@ -31,7 +31,9 @@ app.get('/', (req, res) => {
 app.use('/auth', authRoutes);
 app.use('/products', authenticateToken, productRoutes);
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
+
+
